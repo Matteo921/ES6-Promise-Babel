@@ -50,6 +50,10 @@ App = React.createClass({
     );
   },
 
+Promise([searchingText()])
+    .then((resp) => {
+        console.log(resp);
+});
 
   render: function() {
 
