@@ -10,58 +10,50 @@ App = React.createClass({
     };
   },
 
-  handleSearch: function(searchingText) { 
-    this.setState({
-      loading: true  
-    });
-    this.getGif(searchingText, function(gif) { 
-      this.setState({ 
-        loading: false,  
-        gif: gif,  
-        searchingText: searchingText 
-      });
-    }.bind(this));
-  },
-
-    getGif: function(searchingText) {
-    return new Promise (
-      function(resolve, reject) {
-        var url = GIPHY_API_URL + '/v1/gifs/random?api_key=' + GIPHY_PUB_KEY + '&tag=' + searchingText;
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url);
-        xhr.onload = function() {
-          if (xhr.status === 200) {
-            var data = JSON.parse(xhr.responseText).data;
-            var gif = {
-              url: data.fixed_width_downsampled_url,
-              sourceUrl: data.url
-            };  
-            resolve(gif);
-          } else {
-            reject(new Error(this.statusText));
-          }
+    handleSearch: function(searchingText) {  
+        this.setState({
+          loading: true  
+        });
+        this.getGif(searchingText)
+          .then(function(gif) {  
+          this.setState({  
+            gif: gif,  
+            searchingText: searchingText  
+          });
+        })
+          .catch(err => {
+           console.log(err);
+        })
+          .finally(() => {
+          this.setState({loading: false});
+        });
+      },
+  getGif: function(searchingText) {  
+        return new Promise((resolve, reject) => {
+          var url = GIPHY_API_URL + '/v1/gifs/random?api_key=' + GIPHY_PUB_KEY + '&tag=' + searchingText;  
+          var xhr = new XMLHttpRequest();  
+          xhr.open('GET', url);
+          xhr.onload = function() {
+            if (xhr.status === 200) {
+              var data = JSON.parse(xhr.responseText).data; 
+              var gif = {  
+                url: data.fixed_width_downsampled_url,
+                sourceUrl: data.url
+              };
+              resolve(gif);  
+            } else {
+              reject('Could not find gif');
+            }
+          };
+          
+        })
+      },
+    render: function () {
+        var styles = {
+            margin: '0 auto',
+            textAlign: 'center',
+            width: '90%'
         };
-
-        xhr.onerror = function() {
-          reject(new Error(`XMLHttpRequest Error: ${this.statusText}`));
-        };
-        xhr.send();
-      }
-    );
-  },
-
-Promise([searchingText()])
-    .then((resp) => {
-        console.log(resp);
-});
-
-  render: function() {
-
-    var styles = {
-      margin: '0 auto',
-      textAlign: 'center',
-      width: '90%'
-    };
 
     return (
       <div style={styles}>
